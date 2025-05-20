@@ -1,0 +1,6 @@
+# Database Configuration
+DATABASE_URL=""
+JWT_SECRET=
+
+# Server Configuration
+PORT=
