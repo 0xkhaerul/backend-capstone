@@ -19,10 +19,7 @@ const loginService = async (email, password) => {
     throw new Error("Invalid email or password");
   }
 
-  const token = generateToken({
-    userId: user.id,
-    email: user.email,
-  });
+  const token = generateToken(user);
 
   return {
     error: false,
