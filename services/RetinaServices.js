@@ -1,4 +1,4 @@
-const RetinaHistoryRepository = require("../repositories/saveRetinaRepository");
+const RetinaHistoryRepository = require("../repositories/RetinaRepository");
 
 class RetinaHistoryService {
   constructor() {
@@ -72,6 +72,32 @@ class RetinaHistoryService {
     );
 
     return savedHistory;
+  }
+
+  async deleteRetinaHistory(id, userId) {
+    // Validasi user ID
+    if (!userId) {
+      throw new Error("User ID tidak ditemukan dalam token");
+    }
+
+    // Cek apakah record exists dan milik user yang sedang login
+    const existingRecord = await this.retinaHistoryRepository.findByIdAndUserId(
+      id,
+      userId
+    );
+
+    if (!existingRecord) {
+      const error = new Error(
+        "Data retina history tidak ditemukan atau bukan milik Anda"
+      );
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Hapus data
+    await this.retinaHistoryRepository.deleteByIdAndUserId(id, userId);
+
+    return { success: true, message: "Data berhasil dihapus" };
   }
 }
 

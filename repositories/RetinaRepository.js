@@ -22,6 +22,15 @@ class RetinaHistoryRepository {
     });
   }
 
+  async deleteByIdAndUserId(id, userId) {
+    return await prisma.retinaHistory.delete({
+      where: {
+        id: id,
+        userId: userId,
+      },
+    });
+  }
+
   async findManyByUserId(userId, whereCondition = {}) {
     const condition = {
       userId: userId,

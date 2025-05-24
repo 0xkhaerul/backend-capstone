@@ -1,5 +1,5 @@
 const express = require("express");
-const RetinaHistoryController = require("../controllers/saveHistory/RetinaUserController");
+const RetinaHistoryController = require("../controllers/retinaHistory/RetinaUserController");
 const { verifyToken } = require("../middlewares/auth");
 
 const router = express.Router();
@@ -19,5 +19,7 @@ router.get(
   verifyToken,
   retinaHistoryController.getSavedRetinaHistory
 );
+
+router.delete("/:id", verifyToken, retinaHistoryController.deleteRetinaHistory);
 
 module.exports = router;

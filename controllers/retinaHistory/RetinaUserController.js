@@ -1,4 +1,4 @@
-const RetinaHistoryService = require("../../services/saveRetinaServices");
+const RetinaHistoryService = require("../../services/RetinaServices");
 
 class RetinaHistoryController {
   constructor() {
@@ -100,6 +100,37 @@ class RetinaHistoryController {
         success: false,
         message: "Terjadi kesalahan server",
         error: error.message,
+      });
+    }
+  };
+
+  deleteRetinaHistory = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+
+      const result = await this.retinaHistoryService.deleteRetinaHistory(
+        id,
+        userId
+      );
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      console.error("Error deleting retina history:", error);
+
+      if (error.statusCode) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: "Terjadi kesalahan server",
       });
     }
   };
