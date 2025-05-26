@@ -1,34 +1,26 @@
-const { prisma } = require("../../config/db");
+const FormCheckHistoryService = require("../../services/formCheckHistoryService");
 
 class FormCheckHistoryController {
+  constructor() {
+    this.formCheckHistoryService = new FormCheckHistoryService();
+
+    // Bind methods to preserve 'this' context
+    this.getAllFormCheckHistory = this.getAllFormCheckHistory.bind(this);
+    this.getFormCheckHistoryDetail = this.getFormCheckHistoryDetail.bind(this);
+    this.updateFormCheckHistory = this.updateFormCheckHistory.bind(this);
+    this.deleteFormCheckHistory = this.deleteFormCheckHistory.bind(this);
+  }
+
   // GET - Get all form check history for user
   async getAllFormCheckHistory(req, res) {
     try {
       const userId = req.user.id; // Assuming user ID comes from verifyToken middleware
 
-      const formCheckHistory = await prisma.formCheckHistory.findMany({
-        where: {
-          userId: userId,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+      const result = await this.formCheckHistoryService.getAllFormCheckHistory(
+        userId
+      );
 
-      return res.status(200).json({
-        success: true,
-        message: "Form check history retrieved successfully",
-        data: formCheckHistory,
-      });
+      return res.status(200).json(result);
     } catch (error) {
       console.error("Error getting form check history:", error);
       return res.status(500).json({
@@ -45,34 +37,20 @@ class FormCheckHistoryController {
       const { id } = req.params;
       const userId = req.user.id;
 
-      const formCheckHistory = await prisma.formCheckHistory.findFirst({
-        where: {
-          id: id,
-          userId: userId, // Ensure user can only access their own data
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
+      const result =
+        await this.formCheckHistoryService.getFormCheckHistoryDetail(
+          id,
+          userId
+        );
 
-      if (!formCheckHistory) {
+      if (!result.success && result.statusCode === 404) {
         return res.status(404).json({
-          success: false,
-          message: "Form check history not found",
+          success: result.success,
+          message: result.message,
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: "Form check history detail retrieved successfully",
-        data: formCheckHistory,
-      });
+      return res.status(200).json(result);
     } catch (error) {
       console.error("Error getting form check history detail:", error);
       return res.status(500).json({
@@ -88,66 +66,22 @@ class FormCheckHistoryController {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const {
-        hypertension,
-        heartDisease,
-        bmi,
-        bloodGlucoseLevel,
-        hba1cLevel,
-        smokingHistory,
-        predictionResult,
-      } = req.body;
+      const updateFields = req.body;
 
-      // Check if the record exists and belongs to the user
-      const existingRecord = await prisma.formCheckHistory.findFirst({
-        where: {
-          id: id,
-          userId: userId,
-        },
-      });
+      const result = await this.formCheckHistoryService.updateFormCheckHistory(
+        id,
+        userId,
+        updateFields
+      );
 
-      if (!existingRecord) {
+      if (!result.success && result.statusCode === 404) {
         return res.status(404).json({
-          success: false,
-          message: "Form check history not found",
+          success: result.success,
+          message: result.message,
         });
       }
 
-      // Prepare update data (only include fields that are provided)
-      const updateData = {};
-      if (hypertension !== undefined) updateData.hypertension = hypertension;
-      if (heartDisease !== undefined) updateData.heartDisease = heartDisease;
-      if (bmi !== undefined) updateData.bmi = parseFloat(bmi);
-      if (bloodGlucoseLevel !== undefined)
-        updateData.bloodGlucoseLevel = parseFloat(bloodGlucoseLevel);
-      if (hba1cLevel !== undefined)
-        updateData.hba1cLevel = parseFloat(hba1cLevel);
-      if (smokingHistory !== undefined)
-        updateData.smokingHistory = smokingHistory;
-      if (predictionResult !== undefined)
-        updateData.predictionResult = predictionResult;
-
-      const updatedFormCheckHistory = await prisma.formCheckHistory.update({
-        where: {
-          id: id,
-        },
-        data: updateData,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Form check history updated successfully",
-        data: updatedFormCheckHistory,
-      });
+      return res.status(200).json(result);
     } catch (error) {
       console.error("Error updating form check history:", error);
       return res.status(500).json({
@@ -164,31 +98,19 @@ class FormCheckHistoryController {
       const { id } = req.params;
       const userId = req.user.id;
 
-      // Check if the record exists and belongs to the user
-      const existingRecord = await prisma.formCheckHistory.findFirst({
-        where: {
-          id: id,
-          userId: userId,
-        },
-      });
+      const result = await this.formCheckHistoryService.deleteFormCheckHistory(
+        id,
+        userId
+      );
 
-      if (!existingRecord) {
+      if (!result.success && result.statusCode === 404) {
         return res.status(404).json({
-          success: false,
-          message: "Form check history not found",
+          success: result.success,
+          message: result.message,
         });
       }
 
-      await prisma.formCheckHistory.delete({
-        where: {
-          id: id,
-        },
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Form check history deleted successfully",
-      });
+      return res.status(200).json(result);
     } catch (error) {
       console.error("Error deleting form check history:", error);
       return res.status(500).json({
