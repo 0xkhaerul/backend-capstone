@@ -1,4 +1,12 @@
 const RetinaHistoryRepository = require("../repositories/RetinaRepository");
+const cloudinary = require("cloudinary").v2;
+
+// Konfigurasi Cloudinary
+cloudinary.config({
+  cloud_name: "dsv5gqxsv",
+  api_key: "488594527796423",
+  api_secret: "0xMqmKQMro69_LRZuY9xJe5uT5Q",
+});
 
 class RetinaHistoryService {
   constructor() {
@@ -75,12 +83,10 @@ class RetinaHistoryService {
   }
 
   async deleteRetinaHistory(id, userId) {
-    // Validasi user ID
     if (!userId) {
       throw new Error("User ID tidak ditemukan dalam token");
     }
 
-    // Cek apakah record exists dan milik user yang sedang login
     const existingRecord = await this.retinaHistoryRepository.findByIdAndUserId(
       id,
       userId
@@ -94,10 +100,17 @@ class RetinaHistoryService {
       throw error;
     }
 
-    // Hapus data
+    try {
+      if (existingRecord.imageId) {
+        await cloudinary.uploader.destroy(existingRecord.imageId);
+      }
+    } catch (cloudinaryError) {
+      console.error("Error deleting image from Cloudinary:", cloudinaryError);
+    }
+
     await this.retinaHistoryRepository.deleteByIdAndUserId(id, userId);
 
-    return { success: true, message: "Data berhasil dihapus" };
+    return { success: true, message: "Data dan gambar berhasil dihapus" };
   }
 }
 
