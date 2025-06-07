@@ -40,4 +40,38 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser };
+const getProfile = async (req, res) => {
+  try {
+    // Menggunakan user ID dari token yang sudah diverifikasi oleh middleware
+    const userId = req.user.id;
+
+    const user = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        // Tidak mengambil password untuk keamanan
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile retrieved successfully",
+      user: user,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error retrieving profile", error: error.message });
+  }
+};
+
+module.exports = { createUser, getProfile };

@@ -58,19 +58,6 @@ model RetinaHistory {
   @@map("retina_history")
 }
 
-
-model RetinaHistoryGuest {
-  id              String   @id @default(uuid())
-  image           String
-  imageId         String
-  predictedClass  String
-  confidenceClass Float
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  @@map("retina_history_guest")
-}
-
 model imageSlider {
   id          Int      @id @default(autoincrement())
   title       String

@@ -11,6 +11,4 @@ router.use("/", authRoutes);
 router.use("/retina-user", savedRetinaHistoryRoutes);
 router.use("/form-check-history", formCheckHistoryRoutes);
 
-router.use("/content/imageslider", require("./imagesliderRoutes"));
-
 module.exports = router;
