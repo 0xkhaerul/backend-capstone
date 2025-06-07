@@ -23,6 +23,19 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Handle email not verified error
+    if (
+      error.message ===
+      "Please verify your email first. Check your inbox for OTP code."
+    ) {
+      return res.status(403).json({
+        error: true,
+        message: error.message,
+        requiresVerification: true,
+        action: "Please verify your email using OTP code sent to your inbox",
+      });
+    }
+
     res.status(500).json({
       error: true,
       message: "Error during login",

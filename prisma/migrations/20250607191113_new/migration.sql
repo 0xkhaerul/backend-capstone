@@ -4,6 +4,9 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "otpCode" TEXT,
+    "otpExpiry" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -42,19 +45,6 @@ CREATE TABLE "retina_history" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "retina_history_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "retina_history_guest" (
-    "id" TEXT NOT NULL,
-    "image" TEXT NOT NULL,
-    "imageId" TEXT NOT NULL,
-    "predictedClass" TEXT NOT NULL,
-    "confidenceClass" DOUBLE PRECISION NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "retina_history_guest_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
