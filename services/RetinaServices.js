@@ -1,11 +1,12 @@
 const RetinaHistoryRepository = require("../repositories/RetinaRepository");
+require("dotenv").config(); // Panggil ini di awal file
 const cloudinary = require("cloudinary").v2;
 
-// Konfigurasi Cloudinary
+// Konfigurasi Cloudinary dari .env
 cloudinary.config({
-  cloud_name: "dsv5gqxsv",
-  api_key: "488594527796423",
-  api_secret: "0xMqmKQMro69_LRZuY9xJe5uT5Q",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 class RetinaHistoryService {
