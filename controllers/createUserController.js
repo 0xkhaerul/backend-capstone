@@ -19,36 +19,56 @@ const createUser = async (req, res) => {
       where: { email },
     });
 
-    if (existingUser) {
+    // Jika user sudah ada dan sudah verified, return error
+    if (existingUser && existingUser.isVerified) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = `user-${nanoid()}`;
     const otpCode = generateOTP();
     const otpExpiry = getOTPExpiry();
 
-    // Buat user dengan OTP
-    const user = await prisma.users.create({
-      data: {
-        id: userId,
-        name,
-        email,
-        password: hashedPassword,
-        isVerified: false,
-        otpCode,
-        otpExpiry,
-      },
-    });
+    let user;
+
+    // Jika user sudah ada tapi belum verified, update data user
+    if (existingUser && !existingUser.isVerified) {
+      user = await prisma.users.update({
+        where: { email },
+        data: {
+          name,
+          password: hashedPassword,
+          isVerified: false,
+          otpCode,
+          otpExpiry,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Jika user belum ada, buat user baru
+      const userId = `user-${nanoid()}`;
+      user = await prisma.users.create({
+        data: {
+          id: userId,
+          name,
+          email,
+          password: hashedPassword,
+          isVerified: false,
+          otpCode,
+          otpExpiry,
+        },
+      });
+    }
 
     // Kirim OTP via email
     const emailSent = await sendOTPEmail(email, otpCode, name);
 
     if (!emailSent) {
-      // Jika email gagal dikirim, hapus user yang baru dibuat
-      await prisma.users.delete({
-        where: { id: userId },
-      });
+      // Jika email gagal dikirim dan ini adalah user baru, hapus user
+      if (!existingUser) {
+        await prisma.users.delete({
+          where: { id: user.id },
+        });
+      }
       return res.status(500).json({
         message: "Failed to send verification email. Please try again.",
       });
@@ -58,8 +78,9 @@ const createUser = async (req, res) => {
     const { password: _, otpCode: __, ...userWithoutSensitiveData } = user;
 
     res.status(201).json({
-      message:
-        "User created successfully. Please check your email for OTP verification.",
+      message: existingUser
+        ? "User data updated successfully. Please check your email for OTP verification."
+        : "User created successfully. Please check your email for OTP verification.",
       user: userWithoutSensitiveData,
       otpSent: true,
     });
