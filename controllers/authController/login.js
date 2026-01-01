@@ -1,42 +1,68 @@
-const loginService = require("../../services/loginService");
+const userRepository = require("../../repositories/userRepository");
+const { verifyPassword } = require("../../utils/passwordUtils");
+const { generateToken } = require("../../utils/tokenUtils");
 
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Panggil loginService dan langsung ambil hasil respons yang sudah diformat
-    const result = await loginService.loginService(email, password);
-
-    res.status(200).json(result);
-  } catch (error) {
-    if (error.message === "Email and password are required") {
+    // Validasi input
+    if (!email || !password) {
       return res.status(400).json({
         error: true,
-        message: error.message,
+        message: "Email and password are required",
       });
     }
 
-    if (error.message === "Invalid email or password") {
+    // Cari user berdasarkan email
+    const user = await userRepository.findUserByEmail(email);
+
+    if (!user) {
       return res.status(401).json({
         error: true,
-        message: error.message,
+        message: "Invalid email or password",
       });
     }
 
-    // Handle email not verified error
-    if (
-      error.message ===
-      "Please verify your email first. Check your inbox for OTP code."
-    ) {
+    // Verifikasi password
+    const isPasswordValid = await verifyPassword(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        error: true,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Cek apakah email sudah diverifikasi
+    if (!user.isVerified) {
       return res.status(403).json({
         error: true,
-        message: error.message,
+        message:
+          "Please verify your email first. Check your inbox for OTP code.",
         requiresVerification: true,
         action: "Please verify your email using OTP code sent to your inbox",
       });
     }
 
-    res.status(500).json({
+    // Generate token
+    const token = generateToken(user);
+
+    // Response sukses
+    return res.status(200).json({
+      error: false,
+      message: "Login successful",
+      loginResult: {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        token,
+      },
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({
       error: true,
       message: "Error during login",
       detail: error.message,

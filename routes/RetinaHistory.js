@@ -1,25 +1,17 @@
 const express = require("express");
-const RetinaHistoryController = require("../controllers/retinaHistory/RetinaUserController");
+const {
+  updateSavedStatus,
+  getRetinaHistory,
+  getSavedRetinaHistory,
+  deleteRetinaHistory,
+} = require("../controllers/retinaHistory/RetinaUserController");
 const { verifyToken } = require("../middlewares/auth");
 
 const router = express.Router();
 
-// Instantiate controller
-const retinaHistoryController = new RetinaHistoryController();
-
-// PUT - Update saved status
-router.put("/:id", verifyToken, retinaHistoryController.updateSavedStatus);
-
-// GET - Get all retina history for user (with optional filter)
-router.get("/", verifyToken, retinaHistoryController.getRetinaHistory);
-
-// GET - Get only saved retina history
-router.get(
-  "/saved",
-  verifyToken,
-  retinaHistoryController.getSavedRetinaHistory
-);
-
-router.delete("/:id", verifyToken, retinaHistoryController.deleteRetinaHistory);
+router.put("/:id", verifyToken, updateSavedStatus);
+router.get("/", verifyToken, getRetinaHistory);
+router.get("/saved", verifyToken, getSavedRetinaHistory);
+router.delete("/:id", verifyToken, deleteRetinaHistory);
 
 module.exports = router;

@@ -1,139 +1,236 @@
-const RetinaHistoryService = require("../../services/RetinaServices");
+const RetinaHistoryRepository = require("../../repositories/retinaRepository");
+const cloudinary = require("cloudinary").v2;
 
-class RetinaHistoryController {
-  constructor() {
-    this.retinaHistoryService = new RetinaHistoryService();
+// Konfigurasi Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const retinaHistoryRepository = new RetinaHistoryRepository();
+
+// GET - Get all retina history
+const getRetinaHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { saved } = req.query;
+
+    let whereCondition = {};
+
+    // Filter berdasarkan saved status jika ada query parameter
+    if (saved !== undefined) {
+      if (saved === "true") {
+        whereCondition.savedStatus = true;
+      } else if (saved === "false") {
+        whereCondition.savedStatus = null;
+      }
+    }
+
+    const retinaHistory = await retinaHistoryRepository.findManyByUserId(
+      userId,
+      whereCondition
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Data retina history berhasil diambil",
+      data: retinaHistory,
+    });
+  } catch (error) {
+    console.error("Error getting retina history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server",
+      error: error.message,
+    });
   }
+};
 
-  updateSavedStatus = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { savedStatus } = req.body;
-      const userId = req.user.id; // dari token yang sudah diverifikasi
+// GET - Get detail retina history by ID
+const getRetinaHistoryDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
 
-      const updatedRecord = await this.retinaHistoryService.updateSavedStatus(
-        id,
-        userId,
-        savedStatus
-      );
+    const retinaHistory = await retinaHistoryRepository.findByIdAndUserId(
+      id,
+      userId
+    );
 
-      res.status(200).json({
-        success: true,
-        message: "Status berhasil diupdate",
-        data: updatedRecord,
-      });
-    } catch (error) {
-      console.error("Error updating saved status:", error);
-
-      // Handle custom error dengan statusCode
-      if (error.statusCode) {
-        return res.status(error.statusCode).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      // Handle validation errors
-      if (error.message.includes("User ID tidak ditemukan")) {
-        return res.status(401).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      if (error.message.includes("savedStatus harus")) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      // Handle server errors
-      res.status(500).json({
+    if (!retinaHistory) {
+      return res.status(404).json({
         success: false,
-        message: "Terjadi kesalahan server",
-        error: error.message,
+        message: "Data retina history tidak ditemukan",
       });
     }
-  };
 
-  getRetinaHistory = async (req, res) => {
-    try {
-      const userId = req.user.id;
-      const { saved } = req.query; // optional query parameter
+    return res.status(200).json({
+      success: true,
+      message: "Detail retina history berhasil diambil",
+      data: retinaHistory,
+    });
+  } catch (error) {
+    console.error("Error getting retina history detail:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server",
+      error: error.message,
+    });
+  }
+};
 
-      const retinaHistory = await this.retinaHistoryService.getRetinaHistory(
-        userId,
-        saved
-      );
+// PATCH - Save retina history
+const saveRetinaHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
 
-      res.status(200).json({
-        success: true,
-        message: "Data retina history berhasil diambil",
-        data: retinaHistory,
-      });
-    } catch (error) {
-      console.error("Error getting retina history:", error);
-      res.status(500).json({
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        message: "Terjadi kesalahan server",
-        error: error.message,
+        message: "User tidak terautentikasi",
       });
     }
-  };
 
-  getSavedRetinaHistory = async (req, res) => {
-    try {
-      const userId = req.user.id;
+    // Cek apakah record exists dan milik user
+    const existingRecord = await retinaHistoryRepository.findByIdAndUserId(
+      id,
+      userId
+    );
 
-      const savedHistory =
-        await this.retinaHistoryService.getSavedRetinaHistory(userId);
-
-      res.status(200).json({
-        success: true,
-        message: "Data saved retina history berhasil diambil",
-        data: savedHistory,
-      });
-    } catch (error) {
-      console.error("Error getting saved retina history:", error);
-      res.status(500).json({
+    if (!existingRecord) {
+      return res.status(404).json({
         success: false,
-        message: "Terjadi kesalahan server",
-        error: error.message,
+        message: "Data retina history tidak ditemukan atau bukan milik Anda",
       });
     }
-  };
 
-  deleteRetinaHistory = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const userId = req.user.id;
+    // Update savedStatus to true
+    const updatedRecord = await retinaHistoryRepository.updateSavedStatus(
+      id,
+      true
+    );
 
-      const result = await this.retinaHistoryService.deleteRetinaHistory(
-        id,
-        userId
-      );
+    return res.status(200).json({
+      success: true,
+      message: "Retina history berhasil disimpan",
+      data: updatedRecord,
+    });
+  } catch (error) {
+    console.error("Error saving retina history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server",
+      error: error.message,
+    });
+  }
+};
 
-      res.status(200).json({
-        success: true,
-        message: result.message,
+// PATCH - Unsave retina history
+const unsaveRetinaHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User tidak terautentikasi",
       });
-    } catch (error) {
-      console.error("Error deleting retina history:", error);
+    }
 
-      if (error.statusCode) {
-        return res.status(error.statusCode).json({
-          success: false,
-          message: error.message,
-        });
+    // Cek apakah record exists dan milik user
+    const existingRecord = await retinaHistoryRepository.findByIdAndUserId(
+      id,
+      userId
+    );
+
+    if (!existingRecord) {
+      return res.status(404).json({
+        success: false,
+        message: "Data retina history tidak ditemukan atau bukan milik Anda",
+      });
+    }
+
+    // Update savedStatus to null
+    const updatedRecord = await retinaHistoryRepository.updateSavedStatus(
+      id,
+      null
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Retina history berhasil diunsave",
+      data: updatedRecord,
+    });
+  } catch (error) {
+    console.error("Error unsaving retina history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server",
+      error: error.message,
+    });
+  }
+};
+
+// DELETE - Delete retina history
+const deleteRetinaHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User tidak terautentikasi",
+      });
+    }
+
+    // Cek apakah record exists dan milik user
+    const existingRecord = await retinaHistoryRepository.findByIdAndUserId(
+      id,
+      userId
+    );
+
+    if (!existingRecord) {
+      return res.status(404).json({
+        success: false,
+        message: "Data retina history tidak ditemukan atau bukan milik Anda",
+      });
+    }
+
+    // Hapus gambar dari Cloudinary jika ada
+    try {
+      if (existingRecord.imageId) {
+        await cloudinary.uploader.destroy(existingRecord.imageId);
       }
-
-      res.status(500).json({
-        success: false,
-        message: "Terjadi kesalahan server",
-      });
+    } catch (cloudinaryError) {
+      console.error("Error deleting image from Cloudinary:", cloudinaryError);
+      // Lanjutkan proses delete meskipun gagal hapus dari Cloudinary
     }
-  };
-}
 
-module.exports = RetinaHistoryController;
+    // Hapus record dari database
+    await retinaHistoryRepository.deleteByIdAndUserId(id, userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Data dan gambar berhasil dihapus",
+    });
+  } catch (error) {
+    console.error("Error deleting retina history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  getRetinaHistory,
+  getRetinaHistoryDetail,
+  saveRetinaHistory,
+  unsaveRetinaHistory,
+  deleteRetinaHistory,
+};

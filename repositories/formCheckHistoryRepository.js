@@ -42,21 +42,12 @@ class FormCheckHistoryRepository {
   }
 
   // Update form check history by ID
-  async updateById(id, updateData) {
+  async updateById(id, data) {
     return await prisma.formCheckHistory.update({
       where: {
         id: id,
       },
-      data: updateData,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      data: data,
     });
   }
 

@@ -1,34 +1,22 @@
 const express = require("express");
-const FormCheckHistoryController = require("../controllers/formCheckHistory/formCheckHistoryController");
+const {
+  getFormCheckHistoryDetail,
+  deleteFormCheckHistory,
+  saveFormCheckHistory,
+  unsaveFormCheckHistory,
+} = require("../controllers/formCheckHistory/formCheckHistoryController");
 const { verifyToken } = require("../middlewares/auth");
 
 const router = express.Router();
 
-// Instantiate controller
-const formCheckHistoryController = new FormCheckHistoryController();
+// GET detail
+router.get("/:id", verifyToken, getFormCheckHistoryDetail);
 
-// GET - Get all form check history for user
-router.get("/", verifyToken, formCheckHistoryController.getAllFormCheckHistory);
+// PATCH untuk save/unsave (lebih semantic karena hanya update sebagian field)
+router.patch("/:id/save", verifyToken, saveFormCheckHistory);
+router.patch("/:id/unsave", verifyToken, unsaveFormCheckHistory);
 
-// GET - Get detail form check history by ID
-router.get(
-  "/:id",
-  verifyToken,
-  formCheckHistoryController.getFormCheckHistoryDetail
-);
-
-// PUT - Update form check history
-router.put(
-  "/:id",
-  verifyToken,
-  formCheckHistoryController.updateFormCheckHistory
-);
-
-// DELETE - Delete form check history
-router.delete(
-  "/:id",
-  verifyToken,
-  formCheckHistoryController.deleteFormCheckHistory
-);
+// DELETE
+router.delete("/:id", verifyToken, deleteFormCheckHistory);
 
 module.exports = router;

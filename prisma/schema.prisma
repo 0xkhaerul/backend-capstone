@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,55 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// prisma/schema.prisma
 model Users {
-  id                String            @id @default(uuid())
-  email             String            @unique
-  name              String
-  password          String
-  isVerified        Boolean           @default(false)
-  otpCode           String?
-  otpExpiry         DateTime?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  RetinaHistory     RetinaHistory[]
-  FormCheckHistory  FormCheckHistory[]
-  
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String
+  password         String
+  isVerified       Boolean           @default(false)
+  otpCode          String?
+  otpExpiry        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  RetinaHistory    RetinaHistory[]
+  FormCheckHistory FormCheckHistory[]
+
   @@map("users")
 }
 
 model FormCheckHistory {
-  id                  String   @id @default(uuid())
-  userId              String
-  hypertension        Boolean
-  heartDisease        Boolean
-  bmi                 Float
-  bloodGlucoseLevel   Float
-  hba1cLevel          Float
-  smokingHistory      String   @db.VarChar(50)
-  predictionResult    String
-  gender              String?  @db.VarChar(10)  // Boleh null
-  age                 Int?     // Boleh null
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                String   @id @default(uuid())
+  userId            String?
+  hypertension      Boolean
+  heartDisease      Boolean
+  bmi               Float
+  bloodGlucoseLevel Float
+  hba1cLevel        Float
+  smokingHistory    String   @db.VarChar(50)
+  predictionResult  String
+  gender            String?  @db.VarChar(10)
+  age               Int?
+  isSaved           Boolean?          // 👈 tambahan
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  user                Users    @relation(fields: [userId], references: [id])
-  
+  user              Users?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@map("form_check_history")
 }
 
 model RetinaHistory {
   id              String   @id @default(uuid())
-  userId          String
+  userId          String?
   image           String
   imageId         String
   predictedClass  String
   confidenceClass Float
   savedStatus     Boolean?
+  isSaved         Boolean?          // 👈 tambahan
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  user            Users    @relation(fields: [userId], references: [id])
-  
+
+  user            Users?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@map("retina_history")
 }
 

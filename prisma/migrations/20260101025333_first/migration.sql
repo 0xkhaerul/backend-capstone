@@ -16,7 +16,7 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "form_check_history" (
     "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "hypertension" BOOLEAN NOT NULL,
     "heartDisease" BOOLEAN NOT NULL,
     "bmi" DOUBLE PRECISION NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE "form_check_history" (
 -- CreateTable
 CREATE TABLE "retina_history" (
     "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "image" TEXT NOT NULL,
     "imageId" TEXT NOT NULL,
     "predictedClass" TEXT NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE "image_sliders" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- AddForeignKey
-ALTER TABLE "form_check_history" ADD CONSTRAINT "form_check_history_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "form_check_history" ADD CONSTRAINT "form_check_history_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "retina_history" ADD CONSTRAINT "retina_history_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "retina_history" ADD CONSTRAINT "retina_history_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
