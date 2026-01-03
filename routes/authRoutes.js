@@ -38,7 +38,9 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/v1/login",
+    failureRedirect: process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/login`
+      : "https://capstone-dbs-react.vercel.app/login",
   }),
   googleCallback
 );
