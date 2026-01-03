@@ -29,19 +29,10 @@ router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTP);
 
 // Google OAuth
-router.get("/auth/google", (req, res, next) => {
-  // Optional checkFormId may be passed from frontend as query param
-  // e.g. /v1/auth/google?checkFormId=<id>
-  const checkFormId = req.query.checkFormId;
-
-  // If checkFormId exists, pass it through the OAuth `state` parameter
-  const authOptions = { scope: ["profile", "email"] };
-  if (checkFormId) {
-    authOptions.state = String(checkFormId);
-  }
-
-  passport.authenticate("google", authOptions)(req, res, next);
-});
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
 router.get(
   "/auth/google/callback",
