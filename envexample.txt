@@ -4,3 +4,8 @@ JWT_SECRET=
 
 # Server Configuration
 PORT=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Callback must match the one configured in Google Cloud Console
+# For local dev, use: http://localhost:3000/v1/auth/google/callback
+GOOGLE_CALLBACK_URL=/v1/auth/google/callback

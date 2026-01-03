@@ -11,7 +11,8 @@ model Users {
   id               String            @id @default(uuid())
   email            String            @unique
   name             String
-  password         String
+  password         String?
+  googleId         String?           @unique
   isVerified       Boolean           @default(false)
   otpCode          String?
   otpExpiry        DateTime?
@@ -22,6 +23,7 @@ model Users {
 
   @@map("users")
 }
+
 
 model FormCheckHistory {
   id                String   @id @default(uuid())

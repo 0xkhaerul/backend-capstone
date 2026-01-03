@@ -1,52 +1,60 @@
-// Import packages
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { connectDB } = require("./config/db");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorHandler");
+const passport = require("passport");
+require("./config/google");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration
+/* =========================
+   CORS CONFIGURATION
+========================= */
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-
-    // Allow all localhost origins regardless of port
-    if (origin.startsWith("http://localhost:")) {
-      return callback(null, true);
-    }
-
-    // Add any other domains you want to whitelist
-    callback(null, true); // Allow all origins temporarily (you may want to restrict this in production)
-  },
-  credentials: true, // Allow cookies and authentication headers
+  origin: [
+    "https://capstone-dbs-react.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ],
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
 };
 
-// Apply CORS configuration
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight
 
-// Other middleware
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
-// Routes
+/* =========================
+   ROUTES
+========================= */
 app.use("/v1", routes);
 
-// Root route
+/* =========================
+   ROOT
+========================= */
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the Node.js Prisma API" });
+  res.json({ message: "Backend Capstone API is running 🚀" });
 });
 
-// Error handling middleware
+/* =========================
+   ERROR HANDLER
+========================= */
 app.use(errorHandler);
 
-// Start server
+/* =========================
+   SERVER START
+========================= */
 const startServer = async () => {
   try {
     await connectDB();
