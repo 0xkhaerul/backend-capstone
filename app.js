@@ -1,10 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const passport = require("passport");
+
 const { connectDB } = require("./config/db");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorHandler");
-const passport = require("passport");
+
+// Load Google OAuth strategy
 require("./config/google");
 
 const app = express();
@@ -26,13 +29,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // handle preflight
+app.options("*", cors(corsOptions));
 
 /* =========================
    MIDDLEWARE
 ========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Passport init (no session)
 app.use(passport.initialize());
 
 /* =========================
