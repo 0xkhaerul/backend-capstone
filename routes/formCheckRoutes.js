@@ -1,16 +1,20 @@
 const express = require("express");
 const {
-  getFormCheckHistoryDetail,
+  getFormSaveCheckHistoryDetail,
   deleteFormCheckHistory,
   saveFormCheckHistory,
   unsaveFormCheckHistory,
+  getAllSaveFormCheckHistory,
 } = require("../controllers/formCheckHistory/formCheckHistoryController");
 const { verifyToken } = require("../middlewares/auth");
 
 const router = express.Router();
 
+// GET ALL
+router.get("/", verifyToken, getAllSaveFormCheckHistory);
+
 // GET detail
-router.get("/:id", verifyToken, getFormCheckHistoryDetail);
+router.get("/:id", verifyToken, getFormSaveCheckHistoryDetail);
 
 // PATCH untuk save/unsave (lebih semantic karena hanya update sebagian field)
 router.patch("/:id/save", verifyToken, saveFormCheckHistory);

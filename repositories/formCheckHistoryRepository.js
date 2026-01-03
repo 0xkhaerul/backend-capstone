@@ -6,6 +6,7 @@ class FormCheckHistoryRepository {
     return await prisma.formCheckHistory.findMany({
       where: {
         userId: userId,
+        isSaved: true,
       },
       include: {
         user: {
@@ -28,6 +29,7 @@ class FormCheckHistoryRepository {
       where: {
         id: id,
         userId: userId,
+        isSaved: true,
       },
       include: {
         user: {
@@ -38,6 +40,24 @@ class FormCheckHistoryRepository {
           },
         },
       },
+    });
+  }
+
+  async updateCheckFormUserId(id, userId) {
+    console.log("Repository - Updating id:", id, "with userId:", userId); // Debug log
+
+    // Cek apakah record ada
+    const existingRecord = await prisma.formCheckHistory.findUnique({
+      where: { id },
+    });
+
+    if (!existingRecord) {
+      throw new Error(`FormCheckHistory with id ${id} not found`);
+    }
+
+    return await prisma.formCheckHistory.update({
+      where: { id },
+      data: { userId },
     });
   }
 

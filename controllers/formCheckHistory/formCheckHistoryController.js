@@ -2,8 +2,28 @@ const FormCheckHistoryRepository = require("../../repositories/formCheckHistoryR
 
 const formCheckHistoryRepository = new FormCheckHistoryRepository();
 
-// GET - Get detail form check history by ID
-const getFormCheckHistoryDetail = async (req, res) => {
+const getAllSaveFormCheckHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const formCheckHistory = await formCheckHistoryRepository.findByUserId(
+      userId
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Form check history retrieved successfully",
+      data: formCheckHistory,
+    });
+  } catch (error) {
+    console.error("Error getting form check history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const getFormSaveCheckHistoryDetail = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -177,7 +197,8 @@ const deleteFormCheckHistory = async (req, res) => {
 };
 
 module.exports = {
-  getFormCheckHistoryDetail,
+  getAllSaveFormCheckHistory,
+  getFormSaveCheckHistoryDetail,
   saveFormCheckHistory,
   unsaveFormCheckHistory,
   deleteFormCheckHistory,
