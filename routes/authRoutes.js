@@ -11,6 +11,9 @@ const { verifyToken } = require("../middlewares/auth");
 const router = express.Router();
 const passport = require("passport");
 const { googleCallback } = require("../controllers/authController/google");
+const {
+  completeGoogleRegister,
+} = require("../controllers/authController/google");
 
 // create user
 router.post("/users", createUser);
@@ -39,5 +42,8 @@ router.get(
   }),
   googleCallback
 );
+
+// Endpoint for frontend to complete registration when Google profile lacks a user
+router.post("/auth/google/complete", completeGoogleRegister);
 
 module.exports = router;
