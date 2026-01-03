@@ -1,5 +1,4 @@
-// app.js
-
+// Import packages
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -10,50 +9,44 @@ const errorHandler = require("./middlewares/errorHandler");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* =========================
-   CORS CONFIGURATION
-========================= */
+// CORS configuration
 const corsOptions = {
-  origin: [
-    "https://capstone-dbs-react.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000",
-  ],
-  credentials: true,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow all localhost origins regardless of port
+    if (origin.startsWith("http://localhost:")) {
+      return callback(null, true);
+    }
+
+    // Add any other domains you want to whitelist
+    callback(null, true); // Allow all origins temporarily (you may want to restrict this in production)
+  },
+  credentials: true, // Allow cookies and authentication headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200,
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 };
 
+// Apply CORS configuration
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // handle preflight
 
-/* =========================
-   MIDDLEWARE
-========================= */
+// Other middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* =========================
-   ROUTES
-========================= */
+// Routes
 app.use("/v1", routes);
 
-/* =========================
-   ROOT
-========================= */
+// Root route
 app.get("/", (req, res) => {
-  res.json({ message: "Backend Capstone API is running 🚀" });
+  res.json({ message: "Welcome to the Node.js Prisma API" });
 });
 
-/* =========================
-   ERROR HANDLER
-========================= */
+// Error handling middleware
 app.use(errorHandler);
 
-/* =========================
-   SERVER START
-========================= */
+// Start server
 const startServer = async () => {
   try {
     await connectDB();
