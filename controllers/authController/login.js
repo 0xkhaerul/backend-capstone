@@ -1,10 +1,6 @@
 const userRepository = require("../../repositories/userRepository");
-const FormCheckHistoryRepository = require("../../repositories/formCheckHistoryRepository");
 const { verifyPassword } = require("../../utils/passwordUtils");
 const { generateToken } = require("../../utils/tokenUtils");
-
-// Inisialisasi instance class
-const formCheckRepository = new FormCheckHistoryRepository();
 
 const loginUser = async (req, res) => {
   try {
@@ -23,7 +19,7 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         error: true,
-        message: "Invalid email or password",
+        message: "Email not found",
       });
     }
 
