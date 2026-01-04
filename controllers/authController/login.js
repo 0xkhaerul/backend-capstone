@@ -8,7 +8,7 @@ const formCheckRepository = new FormCheckHistoryRepository();
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password, checkFormId } = req.body;
+    const { email, password } = req.body;
 
     // Validasi input
     if (!email || !password) {
@@ -49,29 +49,6 @@ const loginUser = async (req, res) => {
 
     // Generate token
     const token = generateToken(user);
-
-    // Update checkFormUserId jika checkFormId ada (optional)
-    if (checkFormId) {
-      try {
-        console.log(
-          "Updating checkFormId:",
-          checkFormId,
-          "with userId:",
-          user.id
-        ); // Debug log
-        const updateResult = await formCheckRepository.updateCheckFormUserId(
-          checkFormId,
-          user.id
-        );
-        console.log("Update result:", updateResult); // Debug log
-      } catch (updateError) {
-        console.error("Error updating checkFormUserId:", updateError);
-        console.error("Error details:", updateError.message); // Detail error
-        // Login tetap berhasil meskipun update checkForm gagal
-      }
-    } else {
-      console.log("No checkFormId provided"); // Debug log
-    }
 
     // Response sukses
     return res.status(200).json({

@@ -55,6 +55,13 @@ class FormCheckHistoryRepository {
       throw new Error(`FormCheckHistory with id ${id} not found`);
     }
 
+    // Jika sudah punya userId, jangan overwrite
+    if (existingRecord.userId) {
+      throw new Error(
+        `FormCheckHistory with id ${id} is already assigned to a user`
+      );
+    }
+
     return await prisma.formCheckHistory.update({
       where: { id },
       data: { userId },

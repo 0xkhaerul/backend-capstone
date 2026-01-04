@@ -196,10 +196,59 @@ const deleteFormCheckHistory = async (req, res) => {
   }
 };
 
+const assignUserToFormCheck = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user && req.user.id;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Form check history id is required",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    // Update the record to set userId (repository will check existence and current state)
+    const updated = await formCheckHistoryRepository.updateCheckFormUserId(
+      id,
+      userId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Form check history assigned to user successfully",
+      data: updated,
+    });
+  } catch (error) {
+    console.error("Error assigning form check history to user:", error);
+
+    if (error.message && error.message.includes("already assigned")) {
+      return res.status(409).json({
+        success: false,
+        message: "Form check history already has a user assigned",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllSaveFormCheckHistory,
   getFormSaveCheckHistoryDetail,
   saveFormCheckHistory,
   unsaveFormCheckHistory,
   deleteFormCheckHistory,
+  assignUserToFormCheck,
 };
