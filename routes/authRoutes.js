@@ -4,6 +4,7 @@ const {
   getProfile,
   verifyOTP,
   resendOTP,
+  updateProfile,
 } = require("../controllers/createUserController");
 const { loginUser } = require("../controllers/authController/login");
 const { verifyToken } = require("../middlewares/auth");
@@ -47,5 +48,8 @@ router.get(
 
 // Endpoint for frontend to complete registration when Google profile lacks a user
 router.post("/auth/google/complete", completeGoogleRegister);
+
+// update profile
+router.patch("/profile", verifyToken, updateProfile);
 
 module.exports = router;

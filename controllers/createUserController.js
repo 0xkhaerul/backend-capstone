@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
 const { sendOTPEmail } = require("../config/email");
 const { generateOTP, getOTPExpiry } = require("../utils/otpGenerator");
+const { updateUserProfile } = require("../repositories/userRepository");
 
 const createUser = async (req, res) => {
   try {
@@ -245,4 +246,51 @@ const resendOTP = async (req, res) => {
   }
 };
 
-module.exports = { createUser, getProfile, verifyOTP, resendOTP };
+const updateProfile = async (req, res) => {
+  try {
+    const {
+      no_telp,
+      age,
+      kecamatan,
+      kabupaten,
+      kota,
+      negara,
+      tanggal_lahir,
+      jenis_kelamin,
+    } = req.body;
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const updatedUser = await updateUserProfile(
+      userId,
+      no_telp,
+      age,
+      kecamatan,
+      kabupaten,
+      kota,
+      negara,
+      tanggal_lahir,
+      jenis_kelamin
+    );
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = {
+  createUser,
+  getProfile,
+  verifyOTP,
+  resendOTP,
+  updateProfile,
+};
