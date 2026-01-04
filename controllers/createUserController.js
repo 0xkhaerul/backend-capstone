@@ -108,6 +108,14 @@ const getProfile = async (req, res) => {
         email: true,
         createdAt: true,
         updatedAt: true,
+        noTelp: true,
+        age: true,
+        kecamatan: true,
+        kabupaten: true,
+        kota: true,
+        negara: true,
+        tanggalLahir: true,
+        jenisKelamin: true,
         // Tidak mengambil password untuk keamanan
       },
     });
