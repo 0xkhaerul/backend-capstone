@@ -215,7 +215,6 @@ const assignUserToFormCheck = async (req, res) => {
       });
     }
 
-    // Update the record to set userId (repository will check existence and current state)
     const updated = await formCheckHistoryRepository.updateCheckFormUserId(
       id,
       userId
@@ -230,16 +229,16 @@ const assignUserToFormCheck = async (req, res) => {
     console.error("Error assigning form check history to user:", error);
 
     if (error.message && error.message.includes("already assigned")) {
-      return res.status(409).json({
+      return res.status(200).json({
         success: false,
         message: "Form check history already has a user assigned",
       });
     }
 
+    // real server error
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      error: error.message,
     });
   }
 };
