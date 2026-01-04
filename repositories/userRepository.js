@@ -60,29 +60,32 @@ const updateUserOTP = async (email, otpCode, otpExpiry) => {
 
 const updateUserProfile = async (
   userId,
+  name,
   no_telp,
   age,
   kecamatan,
   kabupaten,
   kota,
   negara,
-  tanggal_lahir,
-  jenis_kelamin
+  tanggalLahir,
+  jenisKelamin
 ) => {
   return await prisma.users.update({
     where: { id: userId },
     data: {
+      name: name ?? null,
       noTelp: no_telp ?? null,
       age: age ? Number(age) : null,
       kecamatan: kecamatan ?? null,
       kabupaten: kabupaten ?? null,
       kota: kota ?? null,
       negara: negara ?? null,
-      tanggalLahir: tanggal_lahir ? new Date(tanggal_lahir) : null,
-      jenisKelamin: jenis_kelamin ?? null,
+      tanggalLahir: tanggalLahir ? new Date(tanggal_lahir) : null,
+      jenisKelamin: jenisKelamin ?? null,
     },
     select: {
       id: true,
+      name: true,
       email: true,
       name: true,
       noTelp: true,

@@ -257,14 +257,15 @@ const resendOTP = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const {
-      no_telp,
+      name,
+      noTelp,
       age,
       kecamatan,
       kabupaten,
       kota,
       negara,
-      tanggal_lahir,
-      jenis_kelamin,
+      tanggalLahir,
+      jenisKelamin,
     } = req.body;
 
     const userId = req.user?.id;
@@ -275,14 +276,15 @@ const updateProfile = async (req, res) => {
 
     const updatedUser = await updateUserProfile(
       userId,
-      no_telp,
+      name,
+      noTelp,
       age,
       kecamatan,
       kabupaten,
       kota,
       negara,
-      tanggal_lahir,
-      jenis_kelamin
+      tanggalLahir,
+      jenisKelamin
     );
 
     return res.status(200).json({
