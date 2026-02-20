@@ -23,6 +23,16 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Cek apakah user memiliki password (bukan hanya OAuth user)
+    if (!user.password) {
+      return res.status(401).json({
+        error: true,
+        message:
+          "This account uses Google Sign-In. Please use Google to login or reset your password.",
+        requiresGoogleSignIn: true,
+      });
+    }
+
     // Verifikasi password
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
