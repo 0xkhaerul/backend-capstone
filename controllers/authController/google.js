@@ -2,8 +2,7 @@ const jwt = require("jsonwebtoken");
 const { generateToken } = require("../../utils/tokenUtils");
 const { prisma } = require("../../config/db");
 
-const FRONTEND_BASE =
-  process.env.FRONTEND_URL || "https://capstone-dbs-react.vercel.app";
+const FRONTEND_BASE = process.env.FRONTEND_URL;
 
 const googleCallback = (req, res) => {
   try {
@@ -29,7 +28,7 @@ const googleCallback = (req, res) => {
         {
           expiresIn: "10m",
           algorithm: "HS256",
-        }
+        },
       );
 
       // Redirect to frontend registration completion page with temp token
