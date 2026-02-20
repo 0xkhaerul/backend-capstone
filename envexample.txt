@@ -1,5 +1,9 @@
 # Database Configuration
-DATABASE_URL=""
+# Untuk serverless (Vercel), gunakan connection pooler URL (PgBouncer/Supabase Pooler/Neon Pooler)
+# Tambahkan ?pgbouncer=true&connection_limit=1 di akhir URL untuk serverless
+DATABASE_URL="postgresql://user:password@host:6543/dbname?pgbouncer=true&connection_limit=1"
+# Direct URL tanpa pooler — untuk migrations (prisma migrate)
+DIRECT_URL="postgresql://user:password@host:5432/dbname"
 JWT_SECRET=
 
 # Server Configuration

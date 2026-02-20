@@ -1,16 +1,19 @@
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+// Singleton pattern: wajib di Vercel/serverless agar koneksi tidak dobel
+// setiap cold start atau hot reload.
+let prisma;
 
-const connectDB = async () => {
-  try {
-    await prisma.$connect();
-    console.log("Database connected successfully");
-    return prisma;
-  } catch (error) {
-    console.error("Database connection error:", error);
-    process.exit(1);
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!global.__prisma) {
+    global.__prisma = new PrismaClient();
   }
-};
+  prisma = global.__prisma;
+}
 
-module.exports = { prisma, connectDB };
+// Prisma terkoneksi secara lazy (otomatis saat query pertama).
+// Tidak perlu $connect() eksplisit — ini justru membuang slot koneksi
+// di lingkungan serverless.
+module.exports = { prisma };

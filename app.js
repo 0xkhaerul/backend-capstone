@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
 
-const { connectDB } = require("./config/db");
+const { prisma } = require("./config/db"); // singleton — import cukup sekali
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorHandler");
 
@@ -57,19 +57,18 @@ app.use(errorHandler);
 
 /* =========================
    SERVER START
+   Di Vercel (serverless) app.js di-export langsung — tidak ada
+   persistent server. app.listen() hanya dijalankan saat local dev.
 ========================= */
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-};
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
-startServer();
+// Graceful shutdown: tutup koneksi Prisma saat proses dihentikan
+process.on("beforeExit", async () => {
+  await prisma.$disconnect();
+});
 
 module.exports = app;
